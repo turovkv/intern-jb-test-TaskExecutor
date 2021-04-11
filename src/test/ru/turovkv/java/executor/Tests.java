@@ -5,20 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-
 public class Tests {
-    @Test
-    public void testCycle() {
-        TaskImpl.WrappedInt wrappedValue = new TaskImpl.WrappedInt(0);
-        TaskImpl task1 = new TaskImpl(wrappedValue, x -> x + 2, null);
-        TaskImpl task2 = new TaskImpl(wrappedValue, x -> x * 2, List.of(task1));
-        task1.setDependenciesList(List.of(task2));
-
-        TaskExecutor executor = new TaskExecutor();
-        Assertions.assertThrows(IllegalStateException.class, () -> executor.execute(List.of(task2, task1)));
-    }
-
-
     @Test
     public void testNull() {
         TaskImpl.WrappedInt wrappedValue1 = new TaskImpl.WrappedInt(0);
@@ -31,6 +18,30 @@ public class Tests {
 
         TaskExecutor executor = new TaskExecutor();
         Assertions.assertThrows(NullPointerException.class, () -> executor.execute(List.of(task2, task1)));
+    }
+
+    @Test
+    public void testCycle1() {
+        TaskImpl.WrappedInt wrappedValue = new TaskImpl.WrappedInt(0);
+        TaskImpl task1 = new TaskImpl(wrappedValue, x -> x + 2, null);
+        TaskImpl task2 = new TaskImpl(wrappedValue, x -> x * 2, List.of(task1));
+        task1.setDependenciesList(List.of(task2));
+
+        TaskExecutor executor = new TaskExecutor();
+        Assertions.assertThrows(IllegalStateException.class, () -> executor.execute(List.of(task2, task1)));
+    }
+
+    @Test
+    public void testCycle2() {
+        TaskImpl.WrappedInt wrappedValue = new TaskImpl.WrappedInt(0);
+        TaskImpl task1 = new TaskImpl(wrappedValue, x -> x + 2, null);
+        TaskImpl task2 = new TaskImpl(wrappedValue, x -> x * 2, List.of(task1));
+        TaskImpl task3 = new TaskImpl(wrappedValue, x -> x * 2, List.of(task2));
+        TaskImpl task4 = new TaskImpl(wrappedValue, x -> x * 2, List.of(task3));
+        task1.setDependenciesList(List.of(task4));
+
+        TaskExecutor executor = new TaskExecutor();
+        Assertions.assertThrows(IllegalStateException.class, () -> executor.execute(List.of(task2, task1, task4, task3)));
     }
 
     @Test

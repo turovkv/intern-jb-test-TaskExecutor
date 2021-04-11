@@ -7,8 +7,8 @@ import java.util.concurrent.ForkJoinPool;
 public class TaskExecutor {
     private final int TREAD_NUMBER = 4;
     private final List<List<Task>> taskGroups = new ArrayList<>(); // Список групп
-    private final Map<Task, Integer> taskGroupNumber = new HashMap<>(); //
-    private final Set<Task> isTaskInDFS = new HashSet<>();
+    private final Map<Task, Integer> taskGroupNumber = new HashMap<>(); // Номер группы у задачи
+    private final Set<Task> isTaskInDFS = new HashSet<>(); // рассматривается ли сейчас задача в обходе.
 
     public void execute(Collection<Task> tasks) {
         // распределение по группам. В одной группе задачи независимы
@@ -46,6 +46,7 @@ public class TaskExecutor {
         if (task.dependencies() != null) {
             for (Task dependTask : task.dependencies()) {
                 if (isTaskInDFS.contains(dependTask)) {
+                    // мы прошли путь dependTask -> task но оказалось, что есть ребро task -> dependTask
                     throw new IllegalStateException("Cyclic dependence");
                 }
                 if (!taskGroupNumber.containsKey(dependTask)) {
