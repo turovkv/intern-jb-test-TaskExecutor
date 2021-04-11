@@ -14,7 +14,7 @@ public class TaskImpl implements Task {
 
     private final WrappedInt wrappedValue;
     private final Function<Integer, Integer> transform;
-    private final Collection<Task> dependenciesList;
+    private Collection<Task> dependenciesList;
 
     public TaskImpl(WrappedInt wrappedValue,
                     Function<Integer, Integer> transform,
@@ -24,13 +24,12 @@ public class TaskImpl implements Task {
         this.dependenciesList = dependenciesList;
     }
 
-    public Integer getValue() {
-        return wrappedValue.value;
+    public void setDependenciesList(Collection<Task> dependenciesList) {
+        this.dependenciesList = dependenciesList;
     }
 
     @Override
     public void execute() {
-        System.out.println(wrappedValue.value + " to " + transform.apply(wrappedValue.value));
         wrappedValue.value = transform.apply(wrappedValue.value);
     }
 

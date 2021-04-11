@@ -6,36 +6,42 @@ import java.util.concurrent.ForkJoinPool;
 
 public class TaskExecutor {
     private final int TREAD_NUMBER = 4;
-    private final List<List<Task>> taskGroups = new ArrayList<>();
-    private final Map<Task, Integer> taskGroupNumber = new HashMap<>();
+    private final List<List<Task>> taskGroups = new ArrayList<>(); // Список групп
+    private final Map<Task, Integer> taskGroupNumber = new HashMap<>(); //
     private final Set<Task> isTaskInDFS = new HashSet<>();
 
     public void execute(Collection<Task> tasks) {
-        // реализация
+        // распределение по группам. В одной группе задачи независимы
         for (Task task : tasks) {
             if (!taskGroupNumber.containsKey(task)) {
                 dfs(task);
             }
         }
 
-        ForkJoinPool customThreadPool = new ForkJoinPool(TREAD_NUMBER);
+        ForkJoinPool threadPool = new ForkJoinPool(TREAD_NUMBER);
         try {
             for (List<Task> group : taskGroups) {
-                customThreadPool.submit(() ->
+                // параллельное выполнение задач из одной группы
+                threadPool.submit(() ->
                         group.parallelStream().forEach(Task::execute)
                 ).get();
             }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         } finally {
-            customThreadPool.shutdown();
+            threadPool.shutdown();
         }
     }
 
+    /*
+    * Обход графа зависимостей в ширину с подсчетом уровня задачи
+    * можно доказать, что любые две задачи из одного уровня независимы
+    * */
     private void dfs(Task task) {
         isTaskInDFS.add(task);
 
-        //вычисление уровня вершины ()
+        //вычисление уровня(группы) задачи.
+        //группа == наибольшее расстояние до задачи без зависимостей
         int groupNumber = -1;
         if (task.dependencies() != null) {
             for (Task dependTask : task.dependencies()) {
